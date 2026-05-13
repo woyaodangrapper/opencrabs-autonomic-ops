@@ -21,7 +21,6 @@ opencrab.db-wal
 .opencrabs/
 .local/share/opencrab/
 .config/opencrab/
-/opencrabs
 
 # Environment variables
 .env
