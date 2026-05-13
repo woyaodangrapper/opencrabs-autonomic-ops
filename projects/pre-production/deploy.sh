@@ -35,7 +35,7 @@ PRE_PROD_DIR="$SCRIPT_DIR"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 BINARY="$REPO_ROOT/target/release/opencrabs"
-BUILD_SETUP="$REPO_ROOT/src/scripts/setup.sh"
+BUILD_SETUP_DIR="$REPO_ROOT/opencrabs/src/scripts"
 OPENCRABS_ROOT="${OPENCRABS_ROOT:-$HOME/.opencrabs}"
 
 info "仓库根目录：  $REPO_ROOT"
@@ -51,17 +51,26 @@ if [ -f "$BINARY" ]; then
 else
     warn "未找到二进制，开始构建..."
 
-    if [ ! -f "$BUILD_SETUP" ]; then
-        error "构建脚本不存在：$BUILD_SETUP"
+
+    if [ ! -d "$BUILD_SETUP_DIR" ]; then
+        error "构建脚本目录不存在：$BUILD_SETUP_DIR"
     fi
 
-    info "安装系统依赖：$BUILD_SETUP"
-    bash "$BUILD_SETUP"
+    for script in setup.sh install.sh; do
+        if [ -f "$BUILD_SETUP_DIR/$script" ]; then
+            info "安装系统依赖：$BUILD_SETUP_DIR/$script"
+            bash "$BUILD_SETUP_DIR/$script"
+        else
+            warn "未找到构建脚本：$BUILD_SETUP_DIR/$script，跳过"
+        fi
+    done
 
     info "执行 cargo build --release..."
-    cd "$REPO_ROOT"
+    export PATH="$HOME/.cargo/bin:$PATH"
+    # 切换到 opencrabs 目录（即 opencrabs/）
+    pushd "$REPO_ROOT/opencrabs/" > /dev/null
     cargo build --release
-    cd - > /dev/null
+    popd > /dev/null
 
     if [ ! -f "$BINARY" ]; then
         error "构建后仍未找到二进制：$BINARY"
