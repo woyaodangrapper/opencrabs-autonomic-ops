@@ -1,5 +1,9 @@
 
 
+<p align="center">
+	<img src="docs/images/logo.svg" alt="OpenCrabs Logo" width="120"/>
+</p>
+
 # 🧬 OpenCrabs Autonomic Ops
 
 ```mermaid
