@@ -9,7 +9,7 @@
 # 用于 ESCALATE 升级路由
 # ========================================
 [providers.custom.freemodel]
-api_key = "fe_oa_da331e6f0263a923ba44b5c4e642a7e5b62587a3bae557ca"
+api_key = "***"
 
 # ========================================
 # 本地 Ollama（局域网，无需 key）
