@@ -1,0 +1,138 @@
+# OpenCrabs API 密钥文件
+# 将此文件复制到 ~/.opencrabs/keys.toml
+# 
+# 重要：复制后设置正确的权限：
+#   chmod 600 ~/.opencrabs/keys.toml
+#
+# 此文件包含敏感 API 密钥，切勿提交到版本控制！
+# 添加到 .gitignore：keys.toml
+
+# ========================================
+# LLM 提供商 API 密钥
+# ========================================
+
+[providers.anthropic]
+# 获取地址：console.anthropic.com
+api_key = ""
+
+[providers.github]
+# 如果已安装 `gh` CLI，则无需密钥，会自动检测 token。
+# 或粘贴 GitHub PAT：github.com/settings/tokens
+api_key = ""
+
+[providers.openai]
+# 获取地址：platform.openai.com
+api_key = ""
+
+[providers.openrouter]
+# 获取地址：openrouter.ai/keys
+api_key = ""
+
+[providers.minimax]
+# 获取地址：platform.minimax.io
+api_key = ""
+
+[providers.gemini]
+# 获取地址：aistudio.google.com
+api_key = ""
+
+[providers.opencode]
+# 获取地址：opencode.ai/settings
+# 用于 Go 和 Zen 套餐的原生 API（无需 CLI）
+api_key = ""
+
+# 自定义提供商使用与 config.toml 中相同的名称：
+# 对于本地 LLM（LM Studio、Ollama），无需 api_key，留空即可
+# 对于远程 OpenAI 兼容 API（Groq、Together 等），在此设置密钥
+[providers.custom.lm_studio]
+api_key = ""
+
+# [providers.custom.ollama]
+# api_key = ""
+
+# ========================================
+# 图像生成与视觉 API 密钥
+# ========================================
+
+[image]
+# 通过 Gemini 进行图像生成和视觉理解时使用同一个 Google AI 密钥
+# 获取密钥：aistudio.google.com
+api_key = ""
+
+# ========================================
+# STT（语音转文本）API 密钥
+# ========================================
+
+[providers.stt.groq]
+# 获取地址：console.groq.com
+api_key = ""
+
+# OpenAI 兼容 STT（自托管 Whisper、Together AI 等）
+[providers.stt.openai_compatible]
+# STT 端点的 API 密钥（如果无需认证则可选）
+api_key = ""
+
+# ========================================
+# TTS（文本转语音）API 密钥
+# ========================================
+
+[providers.tts.openai]
+# 使用 OpenAI 密钥，可与 providers.openai 相同
+api_key = ""
+
+# OpenAI 兼容 TTS（自托管、Together AI 等）
+[providers.tts.openai_compatible]
+# TTS 端点的 API 密钥（如果无需认证则可选）
+api_key = ""
+
+# ========================================
+# 消息频道 Token
+# ========================================
+
+[channels.telegram]
+# 从 Telegram 的 @BotFather 获取
+# 格式："123456789:ABCdef..."
+token = ""
+
+[channels.discord]
+# 从 Discord Developer Portal 获取
+# 格式：约 70 个字符的 base64 字符串
+token = ""
+
+[channels.slack]
+# 从 Slack App 设置获取
+# Bot token（xoxb-...）和 App-level token（xapp-...）
+token = ""
+app_token = ""
+
+[channels.trello]
+# 从 trello.com/power-ups/admin > API Key 标签获取，然后点击 Token 链接
+# app_token = Trello API Key，token = Trello API Token（命名有些混淆，但这是正确映射）
+app_token = ""  # API Key（字母数字，约 32 个字符）
+token = ""      # API Token（长十六进制字符串，约 64 个字符）
+
+[channels.whatsapp]
+# WhatsApp Business API（如果使用云 API）
+token = ""
+
+# ========================================
+# A2A（Agent-to-Agent）网关
+# ========================================
+
+[a2a]
+# 用于认证传入 A2A 请求的 Bearer token
+# 调用方必须发送：Authorization: Bearer <api_key>
+# 留空表示不启用认证（仅回环地址使用时可以）
+api_key = ""
+
+# ========================================
+# Web 搜索 API 密钥
+# ========================================
+
+[providers.web_search.exa]
+# 获取地址：exa.ai/api-key
+api_key = ""
+
+[providers.web_search.brave]
+# 获取地址：brave.com/search/api/
+api_key = ""

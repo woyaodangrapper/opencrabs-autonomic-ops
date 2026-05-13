@@ -1,0 +1,55 @@
+# Qwen3:8B 定时任务示例
+# 部署到 OpenCrabs 后通过以下命令批量注册：
+#   opencrabs -p qwen3-8b cron add --name "..." --cron "..." --prompt "..."
+#
+# 或直接参考本文件手动执行 cron add 命令。
+
+# ─────────────────────────────────────────────
+# 1. 每小时日志巡检（主力任务）
+# ─────────────────────────────────────────────
+# opencrabs -p qwen3-8b cron add \
+#   --name "hourly-log-scan" \
+#   --cron "0 * * * *" \
+#   --tz "Asia/Shanghai" \
+#   --prompt "用 bash 读取最近 1 小时的系统日志（journalctl --since '1 hour ago' 或 /var/log/syslog），提取所有 ERROR 和 WARN 事件，输出 JSON 数组：[{ts, level, service, msg, action}]。发现 ESCALATE 级别事件时在 msg 末尾追加 [ESCALATE]。" \
+#   --auto-approve
+
+# ─────────────────────────────────────────────
+# 2. 每日早 8 点日志摘要（汇总报告）
+# ─────────────────────────────────────────────
+# opencrabs -p qwen3-8b cron add \
+#   --name "daily-log-summary" \
+#   --cron "0 8 * * *" \
+#   --tz "Asia/Shanghai" \
+#   --prompt "读取昨日日志，按服务统计 ERROR/WARN 数量，找出 Top 3 高频错误，输出 Markdown 表格。附上是否需要升级人工排查的判断（YES/NO + 理由）。" \
+#   --auto-approve
+
+# ─────────────────────────────────────────────
+# 3. 每 5 分钟健康检查（轻量心跳）
+# ─────────────────────────────────────────────
+# opencrabs -p qwen3-8b cron add \
+#   --name "health-check" \
+#   --cron "*/5 * * * *" \
+#   --tz "Asia/Shanghai" \
+#   --prompt "用 http_request GET http://localhost:8080/health，检查返回状态码是否为 200。异常时输出 {status: DOWN, ts: ..., detail: ...}，正常时输出 {status: OK}。" \
+#   --auto-approve
+
+# ─────────────────────────────────────────────
+# 4. 每天凌晨 2 点磁盘/进程巡检
+# ─────────────────────────────────────────────
+# opencrabs -p qwen3-8b cron add \
+#   --name "nightly-inspect" \
+#   --cron "0 2 * * *" \
+#   --tz "Asia/Shanghai" \
+#   --prompt "依次执行：1) df -h 检查磁盘使用率，> 85% 标记 WARN；2) ps aux --sort=-%mem | head -10 列出内存 Top10 进程；3) 检查关键服务是否在线（systemctl is-active nginx mysql 等）。输出 JSON 报告。[需人工确认] 不执行任何清理操作。" \
+#   --auto-approve
+
+# ─────────────────────────────────────────────
+# 5. 告警归并（每 15 分钟）
+# ─────────────────────────────────────────────
+# opencrabs -p qwen3-8b cron add \
+#   --name "alert-dedup" \
+#   --cron "*/15 * * * *" \
+#   --tz "Asia/Shanghai" \
+#   --prompt "读取最近 15 分钟内的告警日志（路径：/var/log/alerts.log 或同等），对语义相似的重复告警进行折叠，每类只保留 1 条代表性告警 + 出现次数。输出折叠后的告警列表（JSON）。" \
+#   --auto-approve

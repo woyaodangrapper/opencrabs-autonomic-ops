@@ -1,0 +1,76 @@
+# Qwen3:8B — 轻量运维 profile
+# 部署路径（Windows）：%APPDATA%\opencrabs\config.toml
+# 部署路径（Linux）：  ~/.opencrabs/config.toml
+
+[database]
+# 数据库
+# path = "~/.opencrabs/opencrabs.db"
+
+# ========================================
+# Provider：局域网 Ollama（qwen3:8b，192.168.0.251）
+# ========================================
+# Ollama 部署在局域网服务器 192.168.0.251
+# 确保服务器已执行：ollama pull qwen3:8b && ollama serve
+[providers.ollama]
+enabled = true
+base_url = "http://192.168.0.251:11434/v1/chat/completions"
+default_model = "qwen3:8b"
+
+# ========================================
+# Provider：大模型 gpt-5.5（freemodel.dev，用于 ESCALATE 升级）
+# ========================================
+# API key 存放在 keys.toml：[providers.custom.freemodel] api_key = "..."
+[providers.custom.freemodel]
+enabled = true
+base_url = "https://api.freemodel.dev/v1/chat/completions"
+default_model = "gpt-5.5"
+models = ["gpt-5.5"]
+
+# ========================================
+# Agent 上下文控制（8B 核心参数）
+# ========================================
+[agent]
+# qwen3:8b 实际窗口约 32k，保留 8k 给任务输出，不要超过 24k 输入
+context_limit = 24000
+
+# ESCALATE 路由：子 agent 升级到 gpt-5.5（复杂任务、根因分析、跨服务推理）
+subagent_provider = "custom.freemodel"
+subagent_model = "gpt-5.5"
+
+# ========================================
+# Cron 默认 provider（定时巡检任务）
+# ========================================
+[cron]
+default_provider = "ollama"
+default_model = "qwen3:8b"
+
+# ========================================
+# 禁用所有 channel（轻量任务不需要 bot 监听）
+# 需要时单独打开
+# ========================================
+[channels.telegram]
+enabled = false
+
+[channels.discord]
+enabled = false
+
+[channels.slack]
+enabled = false
+
+[channels.whatsapp]
+enabled = false
+
+# ========================================
+# Daemon 健康检查端口（可选）
+# ========================================
+[daemon]
+# health_port = 8080
+
+# ========================================
+# 搜索（默认只开 duckduckgo，不走 API）
+# ========================================
+[providers.web_search.duckduckgo]
+enabled = true
+
+[providers.web_search.exa]
+enabled = false

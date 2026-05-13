@@ -1,0 +1,386 @@
+# OpenCrabs 配置文件
+# 将此文件复制到以下位置之一：
+#   - Linux/macOS：~/.opencrabs/config.toml
+#   - Windows：%APPDATA%\opencrabs\config.toml 或 opencrabs\config.toml
+#
+# 重要：不要在此处存储 API 密钥！
+# 为了安全，请将 API 密钥存储在 keys.toml 中（chmod 600）：
+#   - ~/.opencrabs/keys.toml
+# keys.toml 中的密钥优先于此文件。
+
+[database]
+# 数据库文件位置（存储对话历史）
+# path = "~/.opencrabs/opencrabs.db"  # 默认值；仅在需要时覆盖
+
+[providers]
+# ========================================
+# Ollama 提供商（本地 + 云端）
+# ========================================
+# 本地：运行在 localhost:11434，无需 API 密钥
+# 云端：将 base_url 设置为你的 Ollama Cloud 端点，并可选配置 API 密钥
+# 模型会自动从 /api/tags 获取
+# 要求：ollama serve（本地）或一个云端端点
+[providers.ollama]
+enabled = false
+base_url = "http://localhost:11434/v1/chat/completions"
+# default_model = "llama3.1"  # 可选：覆盖默认模型
+# api_key = ""  # 可选：仅 Ollama Cloud 需要
+
+# ========================================
+# 自定义：OpenAI 兼容提供商（本地 LLM 以及任何 OpenAI 兼容模型）
+# ========================================
+# 用于 LM Studio、Ollama、LocalAI 等。
+# 每个自定义提供商都需要一个名称，即 "custom." 后面的标签（例如 lm_studio、nvidia、groq）。
+# 你可以按需定义多个提供商，并通过 /models 在它们之间切换。
+[providers.custom.lm_studio]
+enabled = true
+base_url = "http://localhost:1234/v1/chat/completions"  # LM Studio 默认值
+models = ["kimi-k2.5", "glm-5", "MiniMax-M2.7", "qwen3-coder", "gpt-oss-120b", "llama-4-70B", "mistral-Large-3", "qwen3-coder-next"]
+
+# 重要：将此值设置为与 LM Studio 中加载的模型名称完全一致！
+# 常见示例：
+#   - qwen2.5-coder-7b-instruct
+#   - codellama-7b-instruct
+#   - deepseek-coder-6.7b-instruct
+#   - llama-3.2-1b-instruct
+default_model = "qwen3-coder-next"
+
+# 其他本地 LLM 服务器：只需再添加一个具名配置节：
+#
+# [providers.custom.ollama]
+# enabled = false
+# base_url = "http://localhost:11434/v1/chat/completions"
+# default_model = "mistral"
+# models = ["mistral", "llama3", "codellama"]
+
+# ========================================
+# GitHub Copilot 提供商
+# ========================================
+# 通过 OAuth 设备流程使用你的 GitHub Copilot 订阅。
+# 运行 /onboard:provider 并选择 GitHub Copilot 登录。
+# base_url = "https://api.githubcopilot.com/chat/completions"
+[providers.github]
+enabled = false
+default_model = "gpt-4o"
+# 模型会从 Copilot API 实时获取
+
+# ========================================
+# 官方 OpenAI 提供商
+# ========================================
+[providers.openai]
+enabled = false
+default_model = "gpt-5-nano"  # 可选：覆盖默认模型
+# vision_model = "gpt-5-nano"  # 可选：当聊天模型缺少视觉能力时用于描述图片
+
+# ========================================
+# Anthropic 提供商（Claude）
+# ========================================
+[providers.anthropic]
+enabled = false
+default_model = "claude-sonnet-4-6"  # 可选：覆盖默认值
+
+# ========================================
+# OpenRouter 提供商（通过 OpenAI 兼容 API 提供 100+ 模型）
+# ========================================
+[providers.openrouter]
+enabled = false
+base_url = "https://openrouter.ai/api/v1/chat/completions"
+default_model = "qwen/qwen3-coder-next"  # openrouter.ai/models 上有更多选项
+
+# ========================================
+# OpenCode 提供商（Go 和 Zen 套餐）
+# ========================================
+# 原生 API 提供商，无需 CLI 子进程。
+# 模型会从 opencode.ai/zen/go/v1/models 实时获取
+# API 密钥放在 keys.toml 中：[providers.opencode] api_key = "..."
+# 获取密钥：opencode.ai/settings
+[providers.opencode]
+enabled = false
+base_url = "https://opencode.ai/zen/go/v1/chat/completions"
+# default_model = "qwen3.6-plus"  # 可选：覆盖默认值
+
+# ========================================
+# Google Gemini 提供商
+# ========================================
+# 在引导流程和 /models 中会从 Gemini API 实时获取模型
+# API 密钥放在 keys.toml 的 [providers.gemini] 下
+# 获取密钥：aistudio.google.com
+[providers.gemini]
+enabled = false
+default_model = "gemini-2.5-flash"
+
+# ========================================
+# Claude CLI（Max 订阅，无需 API 密钥）
+# ========================================
+# 直接启动本地 'claude' CLI，使用你的 Claude Max 订阅。
+# 无需代理，无需 API 密钥。只需安装 Claude Code CLI 并完成认证。
+# 安装：npm install -g @anthropic-ai/claude-code
+[providers.claude_cli]
+enabled = false
+default_model = "sonnet"  # "sonnet"、"opus" 或 "haiku"
+
+# ========================================
+# Codex CLI（ChatGPT/Codex 订阅，无需 API 密钥）
+# ========================================
+# 直接启动本地 'codex' CLI，复用 `codex login` 存储在
+# ~/.codex/auth.json 中的认证信息。无需代理，无需 API 密钥。
+# 安装：npm install -g @openai/codex（然后运行一次 `codex` 登录）
+# 模型参考 developers.openai.com/codex/models。gpt-5.5 仅支持 ChatGPT 认证；
+# 如果你的账号暂时没有 5.5，可回退到 gpt-5.4。
+[providers.codex_cli]
+enabled = false
+default_model = "gpt-5.5"
+models = [
+    "gpt-5.5",
+    "gpt-5.4",
+    "gpt-5.4-mini",
+    "gpt-5.3-codex",
+    "gpt-5.3-codex-spark",
+    "gpt-5.2",
+]
+
+# ========================================
+# Minimax 提供商（中国 AI，OpenAI 兼容）
+# ========================================
+# 注意：Minimax 没有 /models 端点，因此需要手动添加模型
+[providers.minimax]
+enabled = false
+base_url = "https://api.minimax.io/v1"
+default_model = "MiniMax-M2.7"
+models = ["MiniMax-M2.7", "MiniMax-M2.5", "MiniMax-M2.1", "MiniMax-Text-01"]
+vision_model = "MiniMax-Text-01"  # 当聊天模型缺少视觉能力时用于描述图片
+
+[providers.zhipu]
+enabled = false
+# endpoint_type = "coding"  # "api"（默认）或用于代码优化端点的 "coding"
+default_model = "glm-5.1"
+models = ["glm-5.1", "glm-5-turbo", "glm-5", "glm-4.7", "glm-4.6", "glm-4.5", "glm-4.5-air"]
+# API 密钥放在 keys.toml 中：[providers.zhipu] api_key = "..."
+# 从 open.bigmodel.cn 或 z.ai 获取密钥
+
+# ========================================
+# Qwen / DashScope 提供商（阿里云百炼，OpenAI 兼容）
+# ========================================
+# DashScope OpenAI 兼容端点（使用与你 API 密钥区域匹配的端点）：
+#   - 中国（北京）：https://dashscope.aliyuncs.com/compatible-mode/v1
+#   - 新加坡（国际）：https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+#   - 美国（弗吉尼亚）：https://dashscope-us.aliyuncs.com/compatible-mode/v1
+#   - 阿里巴巴 Coding Plan（国际）：https://coding-intl.dashscope.aliyuncs.com/v1
+#   - 阿里巴巴 Coding Plan（中国）：https://coding.dashscope.aliyuncs.com/v1
+# 区域不可互换：base_url 必须匹配签发密钥的区域。
+# API 密钥放在 keys.toml 中：[providers.qwen] api_key = "..."
+# 获取密钥：bailian.console.aliyun.com（DashScope）或 qwen.ai/apiplatform（Coding Plan）
+[providers.qwen]
+enabled = false
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+default_model = "qwen3.6-plus"
+models = [
+    "qwen3.6-plus",
+    "qwen3-max",
+    "qwen3-coder-plus",
+    "qwen3.5-plus",
+    "qwen-max",
+    "qwen-plus",
+    "qwen-flash",
+    "qwen-vl-max",
+]
+# enable_thinking = true  # 启用 Qwen3 混合思考模式
+
+# ========================================
+# 备用提供商（自动故障转移）
+# ========================================
+# 当主提供商失败时，按顺序尝试这些提供商。
+# 每个提供商都必须已在 keys.toml 中配置 API 密钥。
+# 支持单个或多个备用提供商。
+[providers.fallback]
+enabled = false
+providers = ["openrouter", "anthropic"]  # 失败时按顺序尝试
+# provider = "openrouter"               # 旧格式：单个备用项（请改用 providers 数组）
+
+# ========================================
+# STT（语音转文本）提供商
+# ========================================
+# 使用 Groq Whisper 进行转录
+[providers.stt.groq]
+enabled = false
+default_model = "whisper-large-v3-turbo"
+
+# OpenAI 兼容 STT（自托管 Whisper、Together AI 等）
+[providers.stt.openai_compatible]
+enabled = false
+base_url = "http://localhost:11434"        # Ollama、LM Studio 或任何 OpenAI 兼容 STT
+model = "whisper-large-v3-turbo"
+
+# Voicebox STT（本地语音转文本服务）
+[providers.stt.voicebox]
+enabled = false
+base_url = "http://localhost:8000"
+
+# ========================================
+# TTS（文本转语音）提供商
+# ========================================
+# 使用 OpenAI TTS 进行语音输出
+[providers.tts.openai]
+enabled = false
+default_model = "gpt-4o-mini-tts"
+voice = "ash"             # TTS 语音名称
+model = "gpt-4o-mini-tts" # TTS 模型
+
+# OpenAI 兼容 TTS（自托管、Together AI 等）
+[providers.tts.openai_compatible]
+enabled = false
+base_url = "http://localhost:11434"
+model = "tts-1"
+voice = "alloy"
+
+# Voicebox TTS（本地文本转语音服务）
+[providers.tts.voicebox]
+enabled = false
+base_url = "http://localhost:8000"
+profile_id = ""
+
+# ========================================
+# 图像生成与视觉（Google Gemini）
+# ========================================
+# API 密钥放在 keys.toml 的 [image] 下
+# 获取密钥：aistudio.google.com
+# 使用 /onboard:image 通过向导配置
+
+# ========================================
+# Cron 作业默认值
+# ========================================
+# 未单独指定时，cron 作业使用的默认提供商/模型。
+# 优先级：单个作业的 --provider > [cron] 默认值 > 当前会话的活动提供商。
+# 适合将 cron 作业路由到成本更低的提供商。
+[cron]
+# default_provider = "minimax"
+# default_model = "MiniMax-M2.7"
+
+# ========================================
+# 代理 / 子代理默认值
+# ========================================
+# 生成的子代理默认使用的提供商/模型（例如研究任务、并行工具调用）。
+# 优先级：subagent_provider > 当前会话的活动提供商。
+# 适合让子代理使用更便宜/更快的模型，同时主会话保留高级模型。
+[agent]
+# context_limit = 200000  # 上下文窗口大小，单位为 token（默认：200000）
+# subagent_provider = "zhipu"
+# subagent_model = "GLM 5"
+
+# 启动时自动安装新版本（默认：true）。
+# 为 true 时，OpenCrabs 会在启动时检查 GitHub 并静默安装
+# 任何新版本，然后热重启。如果你希望每次更新前都提示确认
+# （或手动使用 /evolve），请设为 false。
+# auto_update = true
+
+[image.generation]
+enabled = false
+model = "gemini-3.1-flash-image-preview"   # Gemini 图像生成模型（"Nano Banana"）
+
+[image.vision]
+enabled = false
+model = "gemini-3.1-flash-image-preview"   # Gemini 视觉模型
+
+# ========================================
+# 使用本地 LLM 的提示
+# ========================================
+# 1. 启动 OpenCrabs 前，确保 LM Studio 正在运行
+# 2. 先在 LM Studio 中加载一个模型
+# 3. 将 default_model 设置为与 LM Studio 显示的模型名称完全一致
+# 4. 如果出现上下文溢出错误，请在 LM Studio 中增加上下文长度：
+#    - 建议：8192 或更高
+#    - 位置：LM Studio > Model Settings > Context Length
+
+# ==================================================
+# 频道（Telegram / WhatsApp / Slack / Discord / Trello）
+# ==================================================
+
+# respond_to 控制机器人回复哪些消息（适用于 Telegram、Discord、Slack）：
+#   "all"      回复允许频道中的每条消息（默认）
+#   "dm_only"  仅回复直接/私聊消息
+#   "mention"  仅在机器人被 @提及或被回复时响应
+
+[channels.whatsapp]
+enabled = false
+# 允许给机器人发消息的电话号码（E.164 格式，可带前导 +）
+# 访问控制完全基于电话号码：在此添加号码以限制谁可以给机器人发消息。
+allowed_phones = ["+15551234567"]
+# session_idle_hours = 24.0             # N 小时后归档非所有者的不活跃会话（默认：从不）
+
+[channels.discord]
+enabled = false
+allowed_channels = ["channel_id"]       # 机器人工作的频道（空 = 所有频道）
+allowed_users = [123456789012345]        # 机器人回复的用户（数字用户 ID，空 = 所有人）
+# respond_to = "all"                    # 可选值："all" | "dm_only" | "mention"
+# session_idle_hours = 24.0             # N 小时后归档非所有者的不活跃会话（默认：从不）
+
+[channels.telegram]
+enabled = false
+allowed_users = [123456789]             # 机器人回复的用户（数字用户 ID，空 = 所有人）
+# allowed_channels = ["-100123456789"]  # 限制的聊天/群组 ID（空 = 所有聊天）
+# respond_to = "all"                    # 可选值："all" | "dm_only" | "mention"
+# session_idle_hours = 24.0             # N 小时后归档非所有者的不活跃会话（默认：从不）
+
+[channels.slack]
+enabled = false
+allowed_channels = ["C12345678"]        # 机器人工作的频道（Slack 频道 ID，空 = 所有）
+allowed_users = ["U12345678"]           # 机器人回复的用户（Slack 用户 ID，空 = 所有人）
+# respond_to = "all"                    # 可选值："all" | "dm_only" | "mention"
+# session_idle_hours = 24.0             # N 小时后归档非所有者的不活跃会话（默认：从不）
+
+# ========================================
+# Trello 看板卡片管理
+# ========================================
+# API 密钥/token 放在 keys.toml 的 [channels.trello] 下
+# 默认模式：仅工具调用，不自动轮询。只有当你通过 trello_send / trello_connect
+# 明确要求时，AI 才会操作 Trello。
+# 可选轮询：将 poll_interval_secs 设为大于 0，让代理监控看板中
+# 对机器人用户名的 @提及并回复。
+[channels.trello]
+enabled = false
+# 要监控的看板 ID 或名称：可以混用 24 字符十六进制 ID 和人类可读的看板名称。
+# 代理会在启动时解析名称。向导中使用逗号分隔；此处使用 TOML 数组。
+board_ids = ["your-board-name", "abc123def456abc123def456"]
+allowed_users = []                      # 允许 @提及机器人的 Trello 成员 ID（空 = 全部）
+# poll_interval_secs = 30              # 可选：每 N 秒轮询看板中的 @提及。默认禁用。
+# session_idle_hours = 24.0             # N 小时后归档非所有者的不活跃会话（默认：从不）
+
+# ========================================
+# 守护进程模式（systemd / launchd 服务）
+# ========================================
+# `opencrabs daemon` 无头模式的设置。
+[daemon]
+# HTTP 健康检查端口。设置后，GET /health 会返回 200 OK + JSON。
+# 适用于 systemd watchdog、可用性监控和外部健康探针。
+# health_port = 8080
+
+# ========================================
+# Agent-to-Agent（A2A）协议
+# ========================================
+# 启用用于代理间点对点通信的 HTTP 网关。
+# 其他 A2A 兼容代理可以发送任务、协作和辩论。
+[a2a]
+enabled = false
+bind = "127.0.0.1"     # 默认仅绑定回环地址以保证安全
+port = 18790            # A2A 网关端口
+# CORS 允许的来源（空 = 不允许跨源请求）
+# allowed_origins = ["http://localhost:3000"]
+# /a2a/v1 的 Bearer token 认证 API 密钥（可选，非回环地址建议配置）
+# 也可以在 keys.toml 的 [a2a] 下设置 api_key = "..."
+# api_key = "your-secret-key"
+
+# ========================================
+# Web 搜索提供商（默认使用免费的 DuckDuckGo，无需额外 Web 搜索提供商）
+# ========================================
+
+[providers.web_search.exa]
+enabled = true
+# MCP 默认启用且免费。如果想通过 API 使用，免费额度为 1000 次请求。API 密钥放在 keys.toml 中：[providers.web_search.exa] api_key = "..."
+
+[providers.web_search.duckduckgo]
+enabled = true
+# 完全免费，默认启用
+
+[providers.web_search.brave]
+enabled = false
+# 免费额度为 1000 次请求。API 密钥放在 keys.toml 中：[providers.web_search.brave] api_key = "..."

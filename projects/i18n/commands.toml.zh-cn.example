@@ -1,0 +1,80 @@
+# OpenCrabs 用户自定义斜杠命令
+# 将此文件复制到 ~/.opencrabs/commands.toml
+#
+# 命令会立即出现在 / 自动补全下拉列表中。
+# 修改会热重载，无需重启。
+#
+# 代理也可以使用 config_manager 工具自主创建、编辑和删除命令
+# （例如：“create a /deploy command that...”）。
+#
+# action 类型：
+#   "prompt"  将提示词发送给代理执行
+#   "system"  将文本以内联方式显示为系统消息（不调用 LLM）
+
+# ========================================
+# 示例：DevOps 命令
+# ========================================
+
+[[commands]]
+name = "/deploy"
+description = "Deploy to staging server"
+action = "prompt"
+prompt = "Run ./deploy.sh staging and report the result."
+
+[[commands]]
+name = "/rebuild"
+description = "Build and restart OpenCrabs from source"
+action = "prompt"
+prompt = 'Run `RUSTFLAGS="-C target-cpu=native" cargo build --release` in /srv/rs/opencrabs. If it succeeds, ask if I want to restart now.'
+
+# ========================================
+# 示例：效率命令
+# ========================================
+
+[[commands]]
+name = "/standup"
+description = "Generate a daily standup summary"
+action = "prompt"
+prompt = "Summarize my recent git commits and open tasks for a concise standup report."
+
+[[commands]]
+name = "/todo"
+description = "Show open tasks in current project"
+action = "prompt"
+prompt = "List all TODO/FIXME comments in the current project and any open tasks files."
+
+# ========================================
+# 示例：系统消息（不调用 LLM）
+# ========================================
+
+[[commands]]
+name = "/howto"
+description = "Show quick reference for common commands"
+action = "system"
+prompt = "Common commands: /models (switch model), /sessions (browse history), /usage (cost report), /stop (abort operation), /doctor (health check), /approve (approval policy), /compact (compact context), /whisper (voice-to-text), /rebuild (rebuild from source), /cd (change directory), /onboard (setup wizard). Channel commands (Telegram/Discord/Slack): /help, /usage, /models, /stop. Channel history: use channel_search tool (list_chats, recent, search) to browse stored messages across all channels."
+
+# ========================================
+# 示例：频道历史命令
+# ========================================
+
+[[commands]]
+name = "/chats"
+description = "List all known channel chats with message counts"
+action = "prompt"
+prompt = "Use the channel_search tool with operation list_chats to show all known chats across all channels."
+
+[[commands]]
+name = "/history"
+description = "Show recent messages from a channel chat"
+action = "prompt"
+prompt = "Ask me which channel and chat to show history for, then use channel_search with operation recent to show the last 20 messages."
+
+# ========================================
+# 并行代理命令
+# ========================================
+
+[[commands]]
+name = "/btw"
+description = "Spawn a parallel agent for a side task"
+action = "prompt"
+prompt = "Spawn an isolated sub-agent to handle this task in parallel while the main conversation continues. Use the spawn_agent tool with agent_type 'general' and a descriptive label. The user's input after /btw is the task for the sub-agent. After spawning, confirm the agent is running and provide its label for reference."

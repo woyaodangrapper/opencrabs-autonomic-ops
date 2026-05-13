@@ -1,0 +1,18 @@
+# OpenCrabs API Keys — qwen3-8b profile
+# 部署路径：~/.opencrabs/profiles/qwen3-8b/keys.toml
+# 部署后请设置权限（Linux/WSL）：chmod 600 ~/.opencrabs/profiles/qwen3-8b/keys.toml
+#
+# ⚠ 不要将此文件提交到版本控制系统
+
+# ========================================
+# 大模型 gpt-5.5（freemodel.dev）
+# 用于 ESCALATE 升级路由
+# ========================================
+[providers.custom.freemodel]
+api_key = "fe_oa_da331e6f0263a923ba44b5c4e642a7e5b62587a3bae557ca"
+
+# ========================================
+# 本地 Ollama（局域网，无需 key）
+# ========================================
+[providers.ollama]
+api_key = ""

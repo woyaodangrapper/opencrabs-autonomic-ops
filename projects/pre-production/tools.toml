@@ -1,0 +1,64 @@
+# OpenCrabs Dynamic Tools — qwen3-8b profile
+# 部署路径：~/.opencrabs/profiles/qwen3-8b/tools.toml
+# WSL 快速复制：
+#   cp /mnt/d/Projects/当前项目/正在被处理/GitLab/opslab/opencrabs/projects/pre-production/qwen/qwen3-8b/tools.toml \
+#      ~/.opencrabs/profiles/qwen3-8b/tools.toml
+#
+# 修改后热重载，无需重启。
+
+# ─────────────────────────────────────────────────
+# Aspire CLI：列出所有资源状态（子代理优先使用）
+# ─────────────────────────────────────────────────
+# 依赖：
+#   - Aspire CLI：/home/woyaodangrapper/.dotnet/tools/aspire
+#   - AppHost：/mnt/d/Projects/当前项目/正在被处理/opslab/OpsLab/service/service.AppHost/service.AppHost.csproj
+[[tools]]
+name              = "aspire_status"
+description       = "列出所有 Aspire 资源的运行状态和健康情况（JSON）"
+executor          = "shell"
+command           = "bash -c 'ASPIRE=/home/woyaodangrapper/.dotnet/tools/aspire && $ASPIRE ps --format Json --non-interactive 2>/dev/null && $ASPIRE describe --format Json --non-interactive'"
+timeout_secs      = 15
+requires_approval = false
+enabled           = true
+
+# ─────────────────────────────────────────────────
+# 系统日志快照（巡检常用）
+# ─────────────────────────────────────────────────
+[[tools]]
+name              = "log_snapshot"
+description       = "读取最近 N 行系统日志（journalctl），过滤 ERROR/WARN 级别"
+executor          = "shell"
+command           = "journalctl -n {{lines}} --no-pager -q 2>/dev/null | grep -E 'ERROR|WARN|error|warn|failed|Failed' || echo 'no matches'"
+timeout_secs      = 10
+requires_approval = false
+enabled           = true
+
+[[tools.params]]
+name        = "lines"
+type        = "string"
+description = "读取行数（默认 100）"
+required    = false
+
+# ─────────────────────────────────────────────────
+# 磁盘/内存快速检查
+# ─────────────────────────────────────────────────
+[[tools]]
+name              = "sys_health"
+description       = "快速检查磁盘使用率和内存占用（只读，无需审批）"
+executor          = "shell"
+command           = "bash -c 'echo \"=== DISK ===\"; df -h --output=target,pcent | tail -n +2; echo \"=== MEM ===\"; free -h'"
+timeout_secs      = 5
+requires_approval = false
+enabled           = true
+
+# ─────────────────────────────────────────────────
+# Docker 容器状态
+# ─────────────────────────────────────────────────
+[[tools]]
+name              = "docker_ps"
+description       = "列出所有 Docker 容器的运行状态"
+executor          = "shell"
+command           = "docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null || echo 'docker not available'"
+timeout_secs      = 8
+requires_approval = false
+enabled           = true
