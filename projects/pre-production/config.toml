@@ -1,4 +1,16 @@
-# Qwen3:8B — 轻量运维 profile
+# ===============================================
+#           ┌──────────────┐
+#           │ Hermes 8B    │  ← Router / Planner
+#           └──────┬───────┘
+#                  │
+#      ┌───────────┼────────────┐
+#      │                        │
+# ┌────────────┐      ┌────────────────┐
+# │ Qwen 14B   │      │ Qwen Coder 14B │
+# │ (Reasoning)│      │ (Execution)    │
+# └────────────┘      └────────────────┘
+# ===============================================
+
 # 部署路径（Windows）：%APPDATA%\opencrabs\config.toml
 # 部署路径（Linux）：  ~/.opencrabs/config.toml
 
@@ -7,14 +19,33 @@
 # path = "~/.opencrabs/opencrabs.db"
 
 # ========================================
-# Provider：局域网 Ollama（qwen3:8b，192.168.0.251）
+# Provider：局域网（三个 Ollama 模型，各自独立命名）
 # ========================================
 # Ollama 部署在局域网服务器 192.168.0.251
-# 确保服务器已执行：ollama pull qwen3:8b && ollama serve
-[providers.ollama]
+# 确保服务器已执行：ollama serve
+# 调度方式：每个模型注册为独立 custom provider，用 "custom:<name>" 引用
+
+# Router / Planner — 轻量路由，分发任务
+[providers.custom.hermes]
 enabled = true
 base_url = "http://192.168.0.251:11434/v1/chat/completions"
-default_model = "qwen3:8b"
+default_model = "finalend/hermes-3-llama-3.1:8b"
+context_window = 32768     # 实际窗口约32k，compaction 阈值依此触发
+
+# Reasoning — 复杂推理、分析
+[providers.custom.qwen14b]
+enabled = true
+base_url = "http://192.168.0.251:11434/v1/chat/completions"
+default_model = "qwen2.5:14b-instruct-q4_K_M"
+context_window = 32768     # Q4_K_M 量化 + Ollama 默认配置下实际窗口
+
+# Execution / Coding — 代码生成、执行
+[providers.custom.qwen-coder]
+enabled = true
+base_url = "http://192.168.0.251:11434/v1/chat/completions"
+default_model = "qwen2.5-coder:14b-instruct-q4_K_M"
+context_window = 32768     # 同上；如服务器内存允许可调高至 131072
+
 
 # ========================================
 # Provider：大模型 gpt-5.5（freemodel.dev，用于 ESCALATE 升级）
@@ -30,19 +61,21 @@ models = ["gpt-5.5"]
 # Agent 上下文控制（8B 核心参数）
 # ========================================
 [agent]
-# qwen3:8b 实际窗口约 32k，保留 8k 给任务输出，不要超过 24k 输入
+# context_limit 是主会话的输入截断限制，以路由器 Hermes 8B 为标准：
+# 窗口怰32k，保留 8k 给输出，输入不超过 24k
+# 子 agent（qwen14b / qwen-coder）继承此限制；若需要更大上下文可临时调高至 28000
 context_limit = 24000
 
 # ESCALATE 路由：子 agent 升级到 gpt-5.5（复杂任务、根因分析、跨服务推理）
-subagent_provider = "custom.freemodel"
+subagent_provider = "custom:freemodel"
 subagent_model = "gpt-5.5"
 
 # ========================================
 # Cron 默认 provider（定时巡检任务）
 # ========================================
 [cron]
-default_provider = "ollama"
-default_model = "qwen3:8b"
+default_provider = "custom:hermes"
+default_model = "finalend/hermes-3-llama-3.1:8b"
 
 # ========================================
 # 禁用所有 channel（轻量任务不需要 bot 监听）

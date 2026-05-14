@@ -34,7 +34,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PRE_PROD_DIR="$SCRIPT_DIR"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-BINARY="$REPO_ROOT/target/release/opencrabs"
+BINARY="$REPO_ROOT/opencrabs/target/release/opencrabs"
 BUILD_SETUP_DIR="$REPO_ROOT/opencrabs/src/scripts"
 OPENCRABS_ROOT="${OPENCRABS_ROOT:-$HOME/.opencrabs}"
 
@@ -89,6 +89,14 @@ if [ -d "$OPENCRABS_ROOT" ]; then
     echo ""
     echo "若需强制重新部署指定 profile，使用各 profile 下的 scripts/deploy.sh："
     echo "  bash $PRE_PROD_DIR/profiles/laborer/scripts/deploy.sh"
+
+    # ─── 交互询问是否启动 OCAO ─────────────────────────────
+    read -p "是否立即启动 opencrabs-autonomic-ops (OCAO)? [y/N]: " start_ocao
+    if [[ "$start_ocao" =~ ^[Yy]$ ]]; then
+        echo "\n[info] 启动 opencrabs-autonomic-ops...\n"
+        "$BINARY"
+    fi
+
     exit 0
 fi
 
@@ -132,3 +140,10 @@ echo "  opencrabs -p laborer daemon"
 echo ""
 echo "注册 Cron 任务（参考各 profile 下 cron-tasks.toml.example）："
 echo "  opencrabs -p laborer cron list"
+
+# ─── 交互询问是否启动 OCAO ─────────────────────────────
+read -p "是否立即启动 opencrabs-autonomic-ops (OCAO)? [y/N]: " start_ocao
+if [[ "$start_ocao" =~ ^[Yy]$ ]]; then
+    echo "\n[info] 启动 opencrabs-autonomic-ops...\n"
+    "$BINARY"
+fi
